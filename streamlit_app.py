@@ -341,7 +341,7 @@ def main():
             "Minimum Similarity (%)",
             min_value=0,
             max_value=100,
-            value=60,
+            value=35,
             help="Only show results with similarity greater than or equal to this value."
         )
 
