@@ -3,6 +3,14 @@ Streamlit GUI for Quran Tafsir Semantic Search
 A modern web-based interface for searching through Quran commentary (tafsir)
 """
 
+# Fix SQLite version compatibility for ChromaDB
+import sys
+try:
+    import pysqlite3
+    sys.modules['sqlite3'] = pysqlite3
+except ImportError:
+    pass
+
 import streamlit as st
 import sqlite3
 import chromadb
