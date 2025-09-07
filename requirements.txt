@@ -1,0 +1,5 @@
+sentence-transformers
+numpy<2
+chromadb
+torch>=2.0.0,<2.3.0
+streamlit>=1.49.1

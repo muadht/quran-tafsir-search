@@ -1,0 +1,318 @@
+"""
+Streamlit GUI for Quran Tafsir Semantic Search
+A modern web-based interface for searching through Quran commentary (tafsir)
+"""
+
+import streamlit as st
+import sqlite3
+import chromadb
+from chromadb.utils import embedding_functions
+
+# Constants
+UTHMANI_DB_PATH = "quran-data/quran/uthmani.db"
+AUDIO_DB_PATH = "quran-data/recitation/ayah-recitation-khalifa-al-tunaiji-murattal-hafs-958.db"
+METADATA_DB_PATH = "quran-data/metadata/quran-metadata-surah-name.sqlite"
+
+
+@st.cache_resource
+def load_collection():
+    """Load ChromaDB collection with caching for better performance"""
+    return get_existing_collection()
+
+
+def get_existing_collection():
+    """
+    Get existing ChromaDB collection without recreating it.
+    
+    Returns:
+        Existing ChromaDB collection
+    """
+    client = chromadb.PersistentClient(path="chroma_db")
+    
+    # Use the same embedding function
+    sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name="paraphrase-multilingual-MiniLM-L12-v2"
+    )
+    
+    try:
+        collection = client.get_collection(
+            name="quran_tafsir",
+            embedding_function=sentence_transformer_ef
+        )
+        print(f"Connected to existing collection with {collection.count()} documents")
+        return collection
+    except Exception as e:
+        st.error(f"Error loading tafsir database: {e}")
+        st.error("Please ensure the ChromaDB files are present in the 'chroma_db' directory.")
+        st.stop()
+
+
+def search_tafsir(collection, query: str, n_results: int = 5, surah_filter=None):
+    """
+    Search tafsir explanations and return ayah_keys with explanations.
+    """
+    where_clause = None
+    if surah_filter:
+        where_clause = {"surah": surah_filter}
+    
+    results = collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        where=where_clause
+    )
+    
+    return results
+
+
+def fetch_qurtubi_tafsir(ayah_key: str) -> str:
+    """Fetch Qurtubi tafsir for a given ayah_key from ar-tafseer-al-qurtubi.db"""
+    db_path = "quran-data/tafseer/ar-tafseer-al-qurtubi.db"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT text FROM tafsir WHERE ayah_key = ? LIMIT 1", (ayah_key,))
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            return result[0]
+        return "No Qurtubi tafsir found for this ayah."
+    except Exception as e:
+        return f"Error loading Qurtubi tafsir: {e}"
+
+
+@st.cache_data
+def fetch_ayah_text(ayah_key: str) -> str:
+    """Fetch Arabic text of an ayah from the database with caching"""
+    try:
+        conn = sqlite3.connect(UTHMANI_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT text FROM verses WHERE verse_key = ?", (ayah_key,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else "[Ayah not found]"
+    except Exception as e:
+        return f"[Error loading ayah: {e}]"
+
+
+@st.cache_data
+def fetch_audio_url(surah_num: int, verse_num: int) -> str:
+    """Build audio URL for an ayah from the recitation database with caching"""
+    try:
+        # Build the audio URL directly using the pattern
+        audio_url = f"https://audio-cdn.tarteel.ai/quran/khalifaAlTunaiji/{surah_num:03d}{verse_num:03d}.mp3"
+        return audio_url
+    except Exception as e:
+        print(f"Error building audio URL: {e}")
+        return ""
+
+
+@st.cache_data
+def fetch_surah_name(surah_num: int) -> str:
+    """Fetch surah name from metadata database with caching"""
+    try:
+        conn = sqlite3.connect(METADATA_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM chapters WHERE id = ?", (surah_num,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else f"Surah {surah_num}"
+    except Exception as e:
+        print(f"Error fetching surah name: {e}")
+        return f"Surah {surah_num}"
+
+
+def display_search_result(result_doc, result_meta, result_distance, idx):
+    """Display a single search result in a styled container"""
+    ayah_key = result_meta['ayah_key']
+    surah_num = result_meta['surah']
+    verse_num = result_meta['verse']
+    
+    # Fetch additional data
+    arabic_text = fetch_ayah_text(ayah_key)
+    audio_url = fetch_audio_url(surah_num, verse_num)
+    surah_name = fetch_surah_name(surah_num)
+    
+    # Create result container with custom styling
+    with st.container():
+        # Header with surah name and verse number
+        verse_url = f"https://quran.com/{surah_num}:{verse_num}"
+        st.markdown(
+            f"<a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name}</a> <span style='font-size:1.1em;'>- Verse {verse_num}</span>",
+            unsafe_allow_html=True
+        )
+        
+        # Arabic text (RTL)
+        st.markdown(f'<div class="arabic-text">{arabic_text}</div>', unsafe_allow_html=True)
+        
+        # Audio player
+        if audio_url:
+            st.audio(audio_url, format="audio/mp3")
+        
+        # Tafsir text
+        st.markdown(f'<div class="tafsir-text">{result_doc}</div>', unsafe_allow_html=True)
+        
+        # Qurtubi tafsir in an expander, right-aligned
+        with st.expander("Qurtubi Tafsir", expanded=False):
+            qurtubi_tafsir = fetch_qurtubi_tafsir(ayah_key)
+            st.markdown(f"<div class='qurtubi-tafsir-text'>{qurtubi_tafsir}</div>", unsafe_allow_html=True)
+        st.divider()
+
+
+def main():
+    """Main Streamlit application"""
+    st.set_page_config(
+        page_title="Search the Quran",
+        layout="centered",
+        initial_sidebar_state="expanded"
+    )
+    
+    # Custom CSS for better styling
+    st.markdown("""
+    <style>
+    .main .block-container {
+        padding-top: 0rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .arabic-text {
+        font-size: 28px;
+        text-align: right;
+        font-family: 'Amiri', 'Traditional Arabic', serif;
+        direction: rtl;
+        line-height: 1.8;
+        color: #F2F2F7 !important;
+    }
+    .tafsir-text {
+        font-size: 18px;
+        color: #F2F2F7 !important;
+        text-align: left;
+        line-height: 1.7;
+        margin-top: 0.5em;
+        margin-bottom: 1.5em;
+    }
+    .qurtubi-tafsir-text {
+        font-size: 18px;
+        color: #F2F2F7 !important;
+        text-align: right;
+        direction: rtl;
+        line-height: 1.7;
+        margin-top: 0.5em;
+        margin-bottom: 1.5em;
+    }
+    .search-container {
+        padding: 10px 0 0 0;
+        text-align: center;
+    }
+    .result-card {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 4px solid #0A84FF;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Simple header
+    st.title("Search the Quran")
+    st.markdown("Search through Quranic commentary using natural language")
+    
+    # Load collection
+    if 'collection' not in st.session_state:
+        with st.spinner("Loading search database..."):
+            st.session_state.collection = load_collection()
+    
+    collection = st.session_state.collection
+    
+    # Main search interface - centered and prominent, only Semantic Search
+    st.markdown("<div class='search-container'>", unsafe_allow_html=True)
+
+    # Filter controls in a single row (compact)
+    filter_cols = st.columns([3, 2])
+    with filter_cols[0]:
+        # Get all surahs from database for the dropdown
+        conn = sqlite3.connect(METADATA_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name_simple FROM chapters ORDER BY id")
+        all_surahs = cursor.fetchall()
+        conn.close()
+        
+        surah_options = ["All Surahs"] + [f"{surah_id}: {name}" for surah_id, name in all_surahs]
+        selected_surah = st.selectbox("Select Surah (optional)", surah_options)
+        surah_filter = None
+        if selected_surah != "All Surahs":
+            surah_filter = int(selected_surah.split(":")[0])
+    with filter_cols[1]:
+        similarity_threshold = st.slider(
+            "Minimum Similarity (%)",
+            min_value=0,
+            max_value=100,
+            value=60,
+            help="Only show results with similarity greater than or equal to this value."
+        )
+
+    # Main search box - prominent and full width
+    st.markdown("<div style='margin-top: 1em;'>", unsafe_allow_html=True)
+    
+    # Use session state for query value
+    if 'search_query' not in st.session_state:
+        st.session_state.search_query = ""
+
+    # Use st.text_input for the search box (single line, but styled larger)
+    query = st.text_input(
+        "Search the Quranic Commentary",
+        value=st.session_state.search_query,
+        placeholder="Type a question, theme, or concept (e.g., meaning of justice, stories of the prophets)...",
+        help="Search the Quran's tafsir (commentary) using natural language. Find explanations, themes, and insights from the Quran.",
+        label_visibility="collapsed",
+        max_chars=200
+    )
+    st.session_state.search_query = query
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Example searches directly under the search box
+    examples = [
+        "Verses about Allah's mercy and forgiveness",
+        "Teachings about patience in times of hardship",
+        "What does the Quran say about justice and fairness?"
+    ]
+    st.markdown("<div style='margin-top: 0.5em; margin-bottom: 1.5em;'>", unsafe_allow_html=True)
+    cols = st.columns(len(examples))
+    for i, example in enumerate(examples):
+        if cols[i].button(example, key=f"example_{example}"):
+            st.session_state.search_query = example
+            st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    n_results = 50
+
+    # Perform search
+    if query:
+        with st.spinner("Searching..."):
+            results = search_tafsir(collection, query, n_results, surah_filter)
+            if results['documents'][0]:
+                found = False
+                for i, (doc, metadata, distance) in enumerate(zip(
+                    results['documents'][0],
+                    results['metadatas'][0],
+                    results['distances'][0]
+                )):
+                    similarity = (1 - distance) * 100
+                    if similarity >= similarity_threshold:
+                        display_search_result(doc, metadata, distance, i)
+                        found = True
+                if not found:
+                    st.warning("No results found above the selected similarity threshold.")
+            else:
+                st.warning("No results found. Try a different search query.")
+
+    # Footer
+    st.markdown("---")
+    st.markdown("*Powered by ChromaDB and Sentence Transformers for semantic search*")
+
+
+if __name__ == "__main__":
+    main()

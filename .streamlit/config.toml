@@ -1,0 +1,18 @@
+# Streamlit configuration for Quran Tafsir Search
+[theme]
+base = "dark"
+primaryColor = "#0A84FF"
+backgroundColor = "#121212"
+secondaryBackgroundColor = "#1e1e1e"
+textColor = "#F2F2F7"
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+runOnSave = true
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+gatherUsageStats = false
