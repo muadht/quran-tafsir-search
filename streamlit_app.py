@@ -28,6 +28,90 @@ def load_collection():
     return get_existing_collection()
 
 
+def create_tafsir_database_from_sqlite():
+    """
+    Create ChromaDB collection from SQLite data if needed.
+    """
+    print("Creating tafsir database from SQLite...")
+    
+    # Connect to SQLite database
+    conn = sqlite3.connect("quran-data/tafseer/abridged-explanation-of-the-quran.db")
+    cursor = conn.cursor()
+    
+    # Fetch all tafsir data
+    cursor.execute("SELECT ayah_key, text FROM tafsir")
+    rows = cursor.fetchall()
+    conn.close()
+    
+    print(f"Found {len(rows)} tafsir entries")
+    
+    # Prepare data for ChromaDB
+    documents = []
+    metadatas = []
+    ids = []
+    
+    for ayah_key, text in rows:
+        # Clean and prepare text
+        cleaned_text = text.strip()
+        if not cleaned_text:  # Skip empty texts
+            continue
+            
+        documents.append(cleaned_text)
+        
+        # Parse ayah_key (e.g., "1:5" -> surah=1, verse=5)
+        surah, verse = ayah_key.split(':')
+        metadatas.append({
+            'ayah_key': ayah_key,
+            'surah': int(surah),
+            'verse': int(verse),
+            'text_length': len(cleaned_text)
+        })
+        
+        # Use ayah_key as unique ID
+        ids.append(f"tafsir_{ayah_key}")
+    
+    print(f"Prepared {len(documents)} documents for embedding")
+    
+    # Create ChromaDB persistent client
+    client = chromadb.PersistentClient(path="chroma_db")
+    
+    # Use multilingual embedding model for better Arabic/English support
+    sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name="paraphrase-multilingual-MiniLM-L12-v2"
+    )
+    
+    # Create collection (delete if exists)
+    try:
+        client.delete_collection("quran_tafsir")
+    except Exception:
+        pass  # Collection doesn't exist
+    
+    collection = client.create_collection(
+        name="quran_tafsir",
+        embedding_function=sentence_transformer_ef,
+        metadata={"description": "Abridged explanation of the Quran tafsir"}
+    )
+    
+    # Add documents in batches (ChromaDB has limits)
+    batch_size = 1000
+    print("Adding documents to ChromaDB...")
+    
+    for i in range(0, len(documents), batch_size):
+        batch_docs = documents[i:i+batch_size]
+        batch_meta = metadatas[i:i+batch_size]
+        batch_ids = ids[i:i+batch_size]
+        
+        collection.add(
+            documents=batch_docs,
+            metadatas=batch_meta,
+            ids=batch_ids
+        )
+        print(f"Added batch {i//batch_size + 1}/{(len(documents) + batch_size - 1)//batch_size}")
+    
+    print(f"Successfully loaded {len(documents)} tafsir entries into ChromaDB!")
+    return collection
+
+
 def get_existing_collection():
     """
     Get existing ChromaDB collection without recreating it.
@@ -50,9 +134,10 @@ def get_existing_collection():
         print(f"Connected to existing collection with {collection.count()} documents")
         return collection
     except Exception as e:
-        st.error(f"Error loading tafsir database: {e}")
-        st.error("Please ensure the ChromaDB files are present in the 'chroma_db' directory.")
-        st.stop()
+        print(f"Error loading existing collection: {e}")
+        print("Rebuilding collection from SQLite data...")
+        # Rebuild the collection from SQLite
+        return create_tafsir_database_from_sqlite()
 
 
 def search_tafsir(collection, query: str, n_results: int = 5, surah_filter=None):
