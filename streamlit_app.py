@@ -293,9 +293,8 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    # Simple header
-    st.title("Search the Quran")
-    st.markdown("Search through Quranic commentary using natural language")
+    # Simple header - centered
+    st.markdown("<h1 style='text-align: center;'>Search the Quran</h1>", unsafe_allow_html=True)
     
     # Load collection
     if 'collection' not in st.session_state:
@@ -396,7 +395,6 @@ def main():
     st.markdown("---")
     
     # Data Sources Section
-    st.markdown("#### Data Sources")
     st.markdown("""
     <small>
     This application uses authentic Islamic resources to provide accurate Quranic content:
