@@ -340,16 +340,19 @@ def main():
     if 'search_query' not in st.session_state:
         st.session_state.search_query = ""
 
-    # Use st.text_input for the search box (single line, but styled larger)
-    query = st.text_input(
-        "Search the Quranic Commentary",
-        value=st.session_state.search_query,
+    # Use st.chat_input for a prominent search box
+    query = st.chat_input(
         placeholder="Type a question, theme, or concept (e.g., meaning of justice, stories of the prophets)...",
-        help="Search the Quran's tafsir (commentary) using natural language. Find explanations, themes, and insights from the Quran.",
-        label_visibility="collapsed",
         max_chars=200
     )
-    st.session_state.search_query = query
+    
+    # Update session state if new query is entered
+    if query:
+        st.session_state.search_query = query
+    else:
+        # Use previous query if no new input
+        query = st.session_state.search_query
+    
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Filter controls in a collapsible expander (hidden by default)
