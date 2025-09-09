@@ -246,8 +246,12 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
             unsafe_allow_html=True
         )
         
-        # Arabic text (RTL) - Use Streamlit's native subheader for larger, theme-aware text
-        st.markdown(f'<div dir="rtl" style="font-family: \'Amiri\', \'Traditional Arabic\', serif;">{arabic_text}</div>', unsafe_allow_html=True)
+        # Arabic text (RTL) - Use Streamlit's native subheader with RTL direction
+        st.markdown(f"""
+        <div dir="rtl" style="font-family: 'Amiri', 'Traditional Arabic', serif;">
+            <h3 style="margin: 0; font-weight: 400;">{arabic_text}</h3>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Audio player
         if audio_url:
