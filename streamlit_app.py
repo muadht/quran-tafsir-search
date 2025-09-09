@@ -409,7 +409,7 @@ def main():
         )
     
     with search_col2:
-        search_pressed = st.button("🔍 Search", type="primary", use_container_width=True)
+        search_pressed = st.button("Search", use_container_width=True)
     
     # Update session state and trigger search on button press or text input
     if search_pressed and query.strip():
@@ -443,31 +443,6 @@ def main():
                 value=35,
                 help="Only show results with similarity greater than or equal to this value."
             )
-
-    # Example searches - mobile-friendly dropdown instead of buttons
-    examples = [
-        "Select an example...",
-        "Verses about Allah's mercy and forgiveness",
-        "Teachings about patience in times of hardship", 
-        "What does the Quran say about justice and fairness?",
-        "Stories of the prophets and their lessons",
-        "Guidance on prayer and worship",
-        "Quranic wisdom about family and relationships"
-    ]
-    
-    st.markdown("<div style='margin-top: 0.5em; margin-bottom: 1.5em;'>", unsafe_allow_html=True)
-    selected_example = st.selectbox(
-        "💡 Try these example searches:",
-        examples,
-        index=0,
-        help="Select an example to quickly try different types of searches"
-    )
-    
-    if selected_example != "Select an example...":
-        st.session_state.search_query = selected_example
-        st.rerun()
-    
-    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
