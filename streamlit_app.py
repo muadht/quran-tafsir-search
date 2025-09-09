@@ -289,47 +289,27 @@ def main():
         font-size: 16px !important;
     }
     
-    /* Arabic text - responsive to theme */
+    /* Arabic text - uses Streamlit's CSS variables for theme responsiveness */
     .arabic-text {
         font-size: 28px;
         text-align: right;
         font-family: 'Amiri', 'Traditional Arabic', serif;
         direction: rtl;
         line-height: 1.8;
+        color: var(--text-color) !important;
     }
     
-    /* Dark mode text colors */
-    [data-theme="dark"] .arabic-text {
-        color: #F2F2F7 !important;
-    }
-    
-    /* Light mode text colors */
-    [data-theme="light"] .arabic-text, 
-    .arabic-text {
-        color: #1a1a1a !important;
-    }
-    
-    /* Tafsir text - responsive to theme */
+    /* Tafsir text - responsive to system theme */
     .tafsir-text {
         font-size: 18px;
         text-align: left;
         line-height: 1.7;
         margin-top: 0.5em;
         margin-bottom: 1.5em;
+        color: var(--text-color) !important;
     }
     
-    /* Dark mode tafsir */
-    [data-theme="dark"] .tafsir-text {
-        color: #F2F2F7 !important;
-    }
-    
-    /* Light mode tafsir */
-    [data-theme="light"] .tafsir-text, 
-    .tafsir-text {
-        color: #1a1a1a !important;
-    }
-    
-    /* Qurtubi tafsir text - responsive to theme */
+    /* Qurtubi tafsir text - responsive to system theme */
     .qurtubi-tafsir-text {
         font-size: 18px;
         text-align: right;
@@ -337,16 +317,26 @@ def main():
         line-height: 1.7;
         margin-top: 0.5em;
         margin-bottom: 1.5em;
+        color: var(--text-color) !important;
     }
     
-    /* Dark mode qurtubi */
-    [data-theme="dark"] .qurtubi-tafsir-text {
-        color: #F2F2F7 !important;
+    /* Fallback for browsers that don't support CSS variables */
+    /* Dark theme (default based on your config) */
+    .arabic-text, .tafsir-text, .qurtubi-tafsir-text {
+        color: #F2F2F7;
     }
     
-    /* Light mode qurtubi */
-    [data-theme="light"] .qurtubi-tafsir-text, 
-    .qurtubi-tafsir-text {
+    /* Light theme fallback using media query */
+    @media (prefers-color-scheme: light) {
+        .arabic-text, .tafsir-text, .qurtubi-tafsir-text {
+            color: #1a1a1a !important;
+        }
+    }
+    
+    /* Additional fallback for explicit light mode */
+    [data-testid="stApp"][data-theme="light"] .arabic-text,
+    [data-testid="stApp"][data-theme="light"] .tafsir-text,
+    [data-testid="stApp"][data-theme="light"] .qurtubi-tafsir-text {
         color: #1a1a1a !important;
     }
     
