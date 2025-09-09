@@ -236,9 +236,9 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
             f"""
             <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: nowrap;'>
                 <div style='flex: 1; min-width: 0;'>
-                    <a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name} : {verse_num}</a>
+                    <a href='{verse_url}' target='_blank'><strong>{surah_name} : {verse_num}</strong></a>
                 </div>
-                <div style='color: #0A84FF; font-weight: bold; white-space: nowrap; margin-left: 10px;'>
+                <div style='font-weight: bold; white-space: nowrap; margin-left: 10px;'>
                     Similarity: {similarity_percent:.1f}%
                 </div>
             </div>
@@ -249,26 +249,21 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
         # Arabic text (RTL)
         st.markdown(f'<div class="arabic-text">{arabic_text}</div>', unsafe_allow_html=True)
         
-        # Small padding before audio
-        st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
-        
         # Audio player
         if audio_url:
             st.audio(audio_url, format="audio/mp3")
         
-        # Small padding before tafsir
-        st.markdown("<div style='margin: 15px 0;'></div>", unsafe_allow_html=True)
+        # Tafsir text - use Streamlit's native text display
+        st.markdown(result_doc)
         
-        # Tafsir text
-        st.markdown(f'<div class="tafsir-text">{result_doc}</div>', unsafe_allow_html=True)
-        
-        # Qurtubi tafsir in an expander, right-aligned
+        # Qurtubi tafsir in an expander
         with st.expander("Qurtubi Tafsir", expanded=False):
             qurtubi_tafsir = fetch_qurtubi_tafsir(ayah_key)
             st.markdown(f"<div class='qurtubi-tafsir-text'>{qurtubi_tafsir}</div>", unsafe_allow_html=True)
         
-        # Space between results
-        st.markdown("<div style='margin: 25px 0;'></div>", unsafe_allow_html=True)
+        # Space between results using Streamlit's native spacing
+        st.markdown("")
+        st.markdown("")
 
 
 def main():
@@ -279,110 +274,32 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # Custom CSS for better styling
+    # Minimal CSS - only essential functionality not provided by Streamlit theming
     st.markdown("""
     <style>
-    .main .block-container {
-        padding-top: 0rem;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    /* Text input styling with border */
-    .stTextInput input {
-        border: 2px solid #0A84FF !important;
-        border-radius: 8px !important;
-        padding: 12px 16px !important;
-        font-size: 16px !important;
-    }
-    
-    /* Hide the "Press Enter to apply" message */
+    /* Hide the "Press Enter to apply" message for cleaner UX */
     .stTextInput > div > div > div > div {
         display: none !important;
     }
     
-    /* Alternative selector for the helper text */
     [data-testid="InputInstructions"] {
         display: none !important;
     }
     
-    /* Mobile-first responsive design */
-    @media (max-width: 768px) {
-        .main .block-container {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        
-        /* Ensure search button is properly sized on mobile */
-        .stButton > button {
-            height: 3rem;
-            font-size: 16px;
-            white-space: nowrap;
-        }
-        
-        /* Make text input more mobile-friendly */
-        .stTextInput input {
-            font-size: 18px !important;
-        }
-    }
-    
-    /* Arabic text - uses Streamlit's CSS variables for theme responsiveness */
+    /* Arabic text styling - essential for RTL text display */
     .arabic-text {
-        font-size: 28px;
         text-align: right;
         font-family: 'Amiri', 'Traditional Arabic', serif;
         direction: rtl;
         line-height: 1.8;
-        color: var(--text-color) !important;
     }
     
-    /* Tafsir text - responsive to system theme */
-    .tafsir-text {
-        font-size: 18px;
-        text-align: left;
-        line-height: 1.7;
-        margin-top: 0.5em;
-        margin-bottom: 1.5em;
-        color: var(--text-color) !important;
-    }
-    
-    /* Qurtubi tafsir text - responsive to system theme */
+    /* Qurtubi tafsir text - essential for RTL text display */
     .qurtubi-tafsir-text {
-        font-size: 18px;
         text-align: right;
         direction: rtl;
         line-height: 1.7;
-        margin-top: 0.5em;
-        margin-bottom: 1.5em;
-        color: var(--text-color) !important;
     }
-    
-    /* Fallback for browsers that don't support CSS variables */
-    /* Dark theme (default based on your config) */
-    .arabic-text, .tafsir-text, .qurtubi-tafsir-text {
-        color: #F2F2F7;
-    }
-    
-    /* Light theme fallback using media query */
-    @media (prefers-color-scheme: light) {
-        .arabic-text, .tafsir-text, .qurtubi-tafsir-text {
-            color: #1a1a1a !important;
-        }
-    }
-    
-    /* Additional fallback for explicit light mode */
-    [data-testid="stApp"][data-theme="light"] .arabic-text,
-    [data-testid="stApp"][data-theme="light"] .tafsir-text,
-    [data-testid="stApp"][data-theme="light"] .qurtubi-tafsir-text {
-        color: #1a1a1a !important;
-    }
-    
-    .search-container {
-        padding: 10px 0 0 0;
-        text-align: center;
-    }
-    
     </style>
     """, unsafe_allow_html=True)
     
@@ -398,10 +315,8 @@ def main():
     collection = st.session_state.collection
     
     # Main search interface - centered and prominent, only Semantic Search
-    st.markdown("<div class='search-container'>", unsafe_allow_html=True)
 
     # Main search box - prominent and full width (first input)
-    st.markdown("<div style='margin-top: 1em;'>", unsafe_allow_html=True)
     
     # Use session state for query value
     if 'search_query' not in st.session_state:
@@ -430,7 +345,6 @@ def main():
         st.rerun()
     elif query != st.session_state.search_query:
         st.session_state.search_query = query
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # Filter controls in a collapsible expander (hidden by default)
     with st.expander("Advanced Search Options", expanded=False):
@@ -465,8 +379,6 @@ def main():
     "guidance on maintaining faith during trials"*
     """)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
     n_results = 50
 
     # Perform search (triggered by button press or text input change)
@@ -494,12 +406,10 @@ def main():
     st.markdown("---")
     st.markdown(
         """
-        <div style='text-align: center; color: #666; font-size: 14px; margin-top: 2rem;'>
-            Developed by <a href='https://nationalai.net/en/' target='_blank' style='color: #0A84FF; text-decoration: none;'>National AI Powered Systems (NAPS)</a><br>
-            <small>Libya's leading AI & data transformation partner</small>
-        </div>
+        **Developed by [National AI Powered Systems (NAPS)](https://nationalai.net/en/)**  
+        *Libya's leading AI & data transformation partner*
         """, 
-        unsafe_allow_html=True
+        unsafe_allow_html=False
     )
 
 
