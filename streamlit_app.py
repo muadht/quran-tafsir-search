@@ -230,9 +230,6 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
     
     # Create result container with custom styling
     with st.container():
-        # Add subtle result card styling
-        st.markdown('<div class="result-card">', unsafe_allow_html=True)
-        
         # Header with surah name, verse number, and similarity score
         verse_url = f"https://quran.com/{surah_num}:{verse_num}"
         header_col1, header_col2 = st.columns([3, 1])
@@ -270,8 +267,8 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
             qurtubi_tafsir = fetch_qurtubi_tafsir(ayah_key)
             st.markdown(f"<div class='qurtubi-tafsir-text'>{qurtubi_tafsir}</div>", unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # Close result-card
-        st.markdown("<div style='margin: 25px 0;'></div>", unsafe_allow_html=True)  # Space between results
+        # Space between results
+        st.markdown("<div style='margin: 25px 0;'></div>", unsafe_allow_html=True)
 
 
 def main():
@@ -374,22 +371,6 @@ def main():
     .search-container {
         padding: 10px 0 0 0;
         text-align: center;
-    }
-    
-    .result-card {
-        background: rgba(240, 242, 246, 0.3);
-        padding: 20px;
-        border-radius: 8px;
-        margin: 10px 0;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Dark theme result cards */
-    @media (prefers-color-scheme: dark) {
-        .result-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
     }
     
     </style>
