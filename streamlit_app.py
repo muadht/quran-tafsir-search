@@ -231,7 +231,7 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
     # Create result container with custom styling
     with st.container():
         # Header with surah name, verse number, and similarity score (single line)
-        verse_url = f"https://quran.com/{surah_num}:{verse_num}"
+        verse_url = f"https://quran.com/{surah_num}?startingVerse={verse_num}"
         st.markdown(
             f"""
             <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: nowrap;'>
