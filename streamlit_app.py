@@ -452,7 +452,15 @@ def main():
 
     # Footer
     st.markdown("---")
-    st.markdown("*Powered by ChromaDB and Sentence Transformers for semantic search*")
+    st.markdown(
+        """
+        <div style='text-align: center; color: #666; font-size: 14px; margin-top: 2rem;'>
+            Developed by <a href='https://nationalai.net/en/' target='_blank' style='color: #0A84FF; text-decoration: none;'>National AI Powered Systems (NAPS)</a><br>
+            <small>Libya's leading AI & data transformation partner</small>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
 
 
 if __name__ == "__main__":
