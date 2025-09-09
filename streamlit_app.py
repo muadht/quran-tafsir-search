@@ -293,8 +293,9 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    # Simple header - centered
-    st.markdown("<h1 style='text-align: center;'>Search the Quran</h1>", unsafe_allow_html=True)
+    # Simple header - centered with spacing
+    st.markdown("<h1 style='text-align: center; margin-top: 0;'>Search the Quran</h1>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom: 2rem;'></div>", unsafe_allow_html=True)
     
     # Load collection
     if 'collection' not in st.session_state:
