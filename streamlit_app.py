@@ -236,8 +236,7 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
             f"""
             <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: nowrap;'>
                 <div style='flex: 1; min-width: 0;'>
-                    <a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name}</a> 
-                    <span style='font-size:1.1em;'>- Verse {verse_num}</span>
+                    <a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name} - Verse {verse_num}</a>
                 </div>
                 <div style='color: #0A84FF; font-weight: bold; white-space: nowrap; margin-left: 10px;'>
                     Similarity: {similarity_percent:.1f}%
