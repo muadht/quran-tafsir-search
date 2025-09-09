@@ -242,7 +242,7 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
         
         with header_col2:
             st.markdown(
-                f"<div style='text-align: right; color: #0A84FF; font-weight: bold;'>📊 {similarity_percent:.1f}%</div>",
+                f"<div style='text-align: right; color: #0A84FF; font-weight: bold;'>Similarity: {similarity_percent:.1f}%</div>",
                 unsafe_allow_html=True
             )
         
@@ -340,23 +340,20 @@ def main():
     if 'search_query' not in st.session_state:
         st.session_state.search_query = ""
 
-    # Use st.chat_input for a prominent search box
-    query = st.chat_input(
+    # Use st.text_input for the search box (single line, but styled larger)
+    query = st.text_input(
+        "Search the Quranic Commentary",
+        value=st.session_state.search_query,
         placeholder="Type a question, theme, or concept (e.g., meaning of justice, stories of the prophets)...",
+        help="Search the Quran's tafsir (commentary) using natural language. Find explanations, themes, and insights from the Quran.",
+        label_visibility="collapsed",
         max_chars=200
     )
-    
-    # Update session state if new query is entered
-    if query:
-        st.session_state.search_query = query
-    else:
-        # Use previous query if no new input
-        query = st.session_state.search_query
-    
+    st.session_state.search_query = query
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Filter controls in a collapsible expander (hidden by default)
-    with st.expander("🔧 Advanced Search Options", expanded=False):
+    with st.expander("Advanced Search Options", expanded=False):
         filter_cols = st.columns([3, 2])
         with filter_cols[0]:
             # Get all surahs from database for the dropdown
