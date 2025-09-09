@@ -246,8 +246,8 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
             unsafe_allow_html=True
         )
         
-        # Arabic text (RTL)
-        st.markdown(f'<div class="arabic-text">{arabic_text}</div>', unsafe_allow_html=True)
+        # Arabic text (RTL) - Use Streamlit's native subheader for larger, theme-aware text
+        st.markdown(f'<div dir="rtl" style="font-family: \'Amiri\', \'Traditional Arabic\', serif;">{arabic_text}</div>', unsafe_allow_html=True)
         
         # Audio player
         if audio_url:
@@ -259,7 +259,7 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
         # Qurtubi tafsir in an expander
         with st.expander("Qurtubi Tafsir", expanded=False):
             qurtubi_tafsir = fetch_qurtubi_tafsir(ayah_key)
-            st.markdown(f"<div class='qurtubi-tafsir-text'>{qurtubi_tafsir}</div>", unsafe_allow_html=True)
+            st.markdown(f'<div dir="rtl" style="font-family: \'Amiri\', \'Traditional Arabic\', serif;">{qurtubi_tafsir}</div>', unsafe_allow_html=True)
         
         # Space between results using Streamlit's native spacing
         st.markdown("")
@@ -274,7 +274,7 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # Minimal CSS - only essential functionality not provided by Streamlit theming
+    # Minimal CSS - only essential RTL support not provided by Streamlit
     st.markdown("""
     <style>
     /* Hide the "Press Enter to apply" message for cleaner UX */
@@ -284,21 +284,6 @@ def main():
     
     [data-testid="InputInstructions"] {
         display: none !important;
-    }
-    
-    /* Arabic text styling - essential for RTL text display */
-    .arabic-text {
-        text-align: right;
-        font-family: 'Amiri', 'Traditional Arabic', serif;
-        direction: rtl;
-        line-height: 1.8;
-    }
-    
-    /* Qurtubi tafsir text - essential for RTL text display */
-    .qurtubi-tafsir-text {
-        text-align: right;
-        direction: rtl;
-        line-height: 1.7;
     }
     </style>
     """, unsafe_allow_html=True)

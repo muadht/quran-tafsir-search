@@ -7,6 +7,9 @@ secondaryBackgroundColor = "#1e1e1e"
 textColor = "#F2F2F7"
 font = "sans serif"
 
+# Enhanced font configuration for better Arabic text display
+baseFontSize = 20  # Increased from default 16px for better Arabic readability
+
 [server]
 headless = true
 port = 8501
