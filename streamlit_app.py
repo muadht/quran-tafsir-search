@@ -220,6 +220,9 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
     surah_num = result_meta['surah']
     verse_num = result_meta['verse']
     
+    # Calculate similarity percentage
+    similarity_percent = (1 - result_distance) * 100 if result_distance is not None else 0
+    
     # Fetch additional data
     arabic_text = fetch_ayah_text(ayah_key)
     audio_url = fetch_audio_url(surah_num, verse_num)
@@ -227,12 +230,21 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
     
     # Create result container with custom styling
     with st.container():
-        # Header with surah name and verse number
+        # Header with surah name, verse number, and similarity score
         verse_url = f"https://quran.com/{surah_num}:{verse_num}"
-        st.markdown(
-            f"<a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name}</a> <span style='font-size:1.1em;'>- Verse {verse_num}</span>",
-            unsafe_allow_html=True
-        )
+        header_col1, header_col2 = st.columns([3, 1])
+        
+        with header_col1:
+            st.markdown(
+                f"<a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name}</a> <span style='font-size:1.1em;'>- Verse {verse_num}</span>",
+                unsafe_allow_html=True
+            )
+        
+        with header_col2:
+            st.markdown(
+                f"<div style='text-align: right; color: #0A84FF; font-weight: bold;'>📊 {similarity_percent:.1f}%</div>",
+                unsafe_allow_html=True
+            )
         
         # Arabic text (RTL)
         st.markdown(f'<div class="arabic-text">{arabic_text}</div>', unsafe_allow_html=True)
@@ -321,31 +333,7 @@ def main():
     # Main search interface - centered and prominent, only Semantic Search
     st.markdown("<div class='search-container'>", unsafe_allow_html=True)
 
-    # Filter controls in a single row (compact)
-    filter_cols = st.columns([3, 2])
-    with filter_cols[0]:
-        # Get all surahs from database for the dropdown
-        conn = sqlite3.connect(METADATA_DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, name_simple FROM chapters ORDER BY id")
-        all_surahs = cursor.fetchall()
-        conn.close()
-        
-        surah_options = ["All Surahs"] + [f"{surah_id}: {name}" for surah_id, name in all_surahs]
-        selected_surah = st.selectbox("Select Surah (optional)", surah_options)
-        surah_filter = None
-        if selected_surah != "All Surahs":
-            surah_filter = int(selected_surah.split(":")[0])
-    with filter_cols[1]:
-        similarity_threshold = st.slider(
-            "Minimum Similarity (%)",
-            min_value=0,
-            max_value=100,
-            value=35,
-            help="Only show results with similarity greater than or equal to this value."
-        )
-
-    # Main search box - prominent and full width
+    # Main search box - prominent and full width (first input)
     st.markdown("<div style='margin-top: 1em;'>", unsafe_allow_html=True)
     
     # Use session state for query value
@@ -363,6 +351,31 @@ def main():
     )
     st.session_state.search_query = query
     st.markdown("</div>", unsafe_allow_html=True)
+
+    # Filter controls in a collapsible expander (hidden by default)
+    with st.expander("🔧 Advanced Search Options", expanded=False):
+        filter_cols = st.columns([3, 2])
+        with filter_cols[0]:
+            # Get all surahs from database for the dropdown
+            conn = sqlite3.connect(METADATA_DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, name_simple FROM chapters ORDER BY id")
+            all_surahs = cursor.fetchall()
+            conn.close()
+            
+            surah_options = ["All Surahs"] + [f"{surah_id}: {name}" for surah_id, name in all_surahs]
+            selected_surah = st.selectbox("Select Surah (optional)", surah_options)
+            surah_filter = None
+            if selected_surah != "All Surahs":
+                surah_filter = int(selected_surah.split(":")[0])
+        with filter_cols[1]:
+            similarity_threshold = st.slider(
+                "Minimum Similarity (%)",
+                min_value=0,
+                max_value=100,
+                value=35,
+                help="Only show results with similarity greater than or equal to this value."
+            )
 
     # Example searches directly under the search box
     examples = [
