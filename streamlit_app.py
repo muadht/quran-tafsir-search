@@ -230,21 +230,22 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
     
     # Create result container with custom styling
     with st.container():
-        # Header with surah name, verse number, and similarity score
+        # Header with surah name, verse number, and similarity score (single line)
         verse_url = f"https://quran.com/{surah_num}:{verse_num}"
-        header_col1, header_col2 = st.columns([3, 1])
-        
-        with header_col1:
-            st.markdown(
-                f"<a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name}</a> <span style='font-size:1.1em;'>- Verse {verse_num}</span>",
-                unsafe_allow_html=True
-            )
-        
-        with header_col2:
-            st.markdown(
-                f"<div style='text-align: right; color: #0A84FF; font-weight: bold;'>Similarity: {similarity_percent:.1f}%</div>",
-                unsafe_allow_html=True
-            )
+        st.markdown(
+            f"""
+            <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: nowrap;'>
+                <div style='flex: 1; min-width: 0;'>
+                    <a href='{verse_url}' target='_blank' class='quran-link-btn'>{surah_name}</a> 
+                    <span style='font-size:1.1em;'>- Verse {verse_num}</span>
+                </div>
+                <div style='color: #0A84FF; font-weight: bold; white-space: nowrap; margin-left: 10px;'>
+                    Similarity: {similarity_percent:.1f}%
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         
         # Arabic text (RTL)
         st.markdown(f'<div class="arabic-text">{arabic_text}</div>', unsafe_allow_html=True)
