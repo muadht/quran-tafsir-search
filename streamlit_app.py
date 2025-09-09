@@ -444,20 +444,13 @@ def main():
                 help="Only show results with similarity greater than or equal to this value."
             )
 
-    # Example queries to demonstrate app capabilities
-    st.markdown("**Example searches:**")
-    examples = [
-        "Allah's mercy and forgiveness",
-        "Patience during hardship", 
-        "Justice and fairness",
-        "Stories of Prophet Moses"
-    ]
-    
-    example_cols = st.columns(len(examples))
-    for i, example in enumerate(examples):
-        if example_cols[i].button(f"_{example}_", key=f"ex_{i}", help=f"Search: {example}"):
-            st.session_state.search_query = example
-            st.rerun()
+    # Show what types of queries the app can handle
+    st.markdown("""
+    *Try searching for themes like "mercy and compassion in times of difficulty" • 
+    "what the Quran teaches about dealing with injustice" • 
+    "stories and lessons from Prophet Abraham" • 
+    "guidance on maintaining faith during trials"*
+    """)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
