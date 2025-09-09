@@ -280,31 +280,76 @@ def main():
         margin-left: auto;
         margin-right: auto;
     }
+    
+    /* Text input styling with border */
+    .stTextInput input {
+        border: 2px solid #0A84FF !important;
+        border-radius: 8px !important;
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+    }
+    
+    /* Arabic text - responsive to theme */
     .arabic-text {
         font-size: 28px;
         text-align: right;
         font-family: 'Amiri', 'Traditional Arabic', serif;
         direction: rtl;
         line-height: 1.8;
+    }
+    
+    /* Dark mode text colors */
+    [data-theme="dark"] .arabic-text {
         color: #F2F2F7 !important;
     }
+    
+    /* Light mode text colors */
+    [data-theme="light"] .arabic-text, 
+    .arabic-text {
+        color: #1a1a1a !important;
+    }
+    
+    /* Tafsir text - responsive to theme */
     .tafsir-text {
         font-size: 18px;
-        color: #F2F2F7 !important;
         text-align: left;
         line-height: 1.7;
         margin-top: 0.5em;
         margin-bottom: 1.5em;
     }
+    
+    /* Dark mode tafsir */
+    [data-theme="dark"] .tafsir-text {
+        color: #F2F2F7 !important;
+    }
+    
+    /* Light mode tafsir */
+    [data-theme="light"] .tafsir-text, 
+    .tafsir-text {
+        color: #1a1a1a !important;
+    }
+    
+    /* Qurtubi tafsir text - responsive to theme */
     .qurtubi-tafsir-text {
         font-size: 18px;
-        color: #F2F2F7 !important;
         text-align: right;
         direction: rtl;
         line-height: 1.7;
         margin-top: 0.5em;
         margin-bottom: 1.5em;
     }
+    
+    /* Dark mode qurtubi */
+    [data-theme="dark"] .qurtubi-tafsir-text {
+        color: #F2F2F7 !important;
+    }
+    
+    /* Light mode qurtubi */
+    [data-theme="light"] .qurtubi-tafsir-text, 
+    .qurtubi-tafsir-text {
+        color: #1a1a1a !important;
+    }
+    
     .search-container {
         padding: 10px 0 0 0;
         text-align: center;
