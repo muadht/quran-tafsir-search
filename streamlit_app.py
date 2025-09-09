@@ -289,6 +289,26 @@ def main():
         font-size: 16px !important;
     }
     
+    /* Mobile-first responsive design */
+    @media (max-width: 768px) {
+        .main .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        /* Ensure search button is properly sized on mobile */
+        .stButton > button {
+            height: 3rem;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+        
+        /* Make text input more mobile-friendly */
+        .stTextInput input {
+            font-size: 18px !important;
+        }
+    }
+    
     /* Arabic text - uses Streamlit's CSS variables for theme responsiveness */
     .arabic-text {
         font-size: 28px;
@@ -375,16 +395,28 @@ def main():
     if 'search_query' not in st.session_state:
         st.session_state.search_query = ""
 
-    # Use st.text_input for the search box (single line, but styled larger)
-    query = st.text_input(
-        "Search the Quranic Commentary",
-        value=st.session_state.search_query,
-        placeholder="Type a question, theme, or concept (e.g., meaning of justice, stories of the prophets)...",
-        help="Search the Quran's tafsir (commentary) using natural language. Find explanations, themes, and insights from the Quran.",
-        label_visibility="collapsed",
-        max_chars=200
-    )
-    st.session_state.search_query = query
+    # Create search input with submit button for mobile-friendly interaction
+    search_col1, search_col2 = st.columns([4, 1])
+    
+    with search_col1:
+        query = st.text_input(
+            "Search the Quranic Commentary",
+            value=st.session_state.search_query,
+            placeholder="Ask about Quranic themes or concepts...",
+            help="Search the Quran's tafsir (commentary) using natural language. Find explanations, themes, and insights from the Quran.",
+            label_visibility="collapsed",
+            max_chars=200
+        )
+    
+    with search_col2:
+        search_pressed = st.button("🔍 Search", type="primary", use_container_width=True)
+    
+    # Update session state and trigger search on button press or text input
+    if search_pressed and query.strip():
+        st.session_state.search_query = query.strip()
+        st.rerun()
+    elif query != st.session_state.search_query:
+        st.session_state.search_query = query
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Filter controls in a collapsible expander (hidden by default)
@@ -412,28 +444,40 @@ def main():
                 help="Only show results with similarity greater than or equal to this value."
             )
 
-    # Example searches directly under the search box
+    # Example searches - mobile-friendly dropdown instead of buttons
     examples = [
+        "Select an example...",
         "Verses about Allah's mercy and forgiveness",
-        "Teachings about patience in times of hardship",
-        "What does the Quran say about justice and fairness?"
+        "Teachings about patience in times of hardship", 
+        "What does the Quran say about justice and fairness?",
+        "Stories of the prophets and their lessons",
+        "Guidance on prayer and worship",
+        "Quranic wisdom about family and relationships"
     ]
+    
     st.markdown("<div style='margin-top: 0.5em; margin-bottom: 1.5em;'>", unsafe_allow_html=True)
-    cols = st.columns(len(examples))
-    for i, example in enumerate(examples):
-        if cols[i].button(example, key=f"example_{example}"):
-            st.session_state.search_query = example
-            st.rerun()
+    selected_example = st.selectbox(
+        "💡 Try these example searches:",
+        examples,
+        index=0,
+        help="Select an example to quickly try different types of searches"
+    )
+    
+    if selected_example != "Select an example...":
+        st.session_state.search_query = selected_example
+        st.rerun()
+    
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
     n_results = 50
 
-    # Perform search
-    if query:
+    # Perform search (triggered by button press or text input change)
+    current_query = st.session_state.search_query.strip()
+    if current_query:
         with st.spinner("Searching..."):
-            results = search_tafsir(collection, query, n_results, surah_filter)
+            results = search_tafsir(collection, current_query, n_results, surah_filter)
             if results['documents'][0]:
                 found = False
                 for i, (doc, metadata, distance) in enumerate(zip(
