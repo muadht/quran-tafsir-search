@@ -396,17 +396,17 @@ def main():
     st.markdown("---")
     
     # Data Sources Section
-    st.markdown("###Data Sources")
+    st.markdown("### Data Sources")
     st.markdown("""
     This application uses authentic Islamic resources to provide accurate Quranic content:
     
-    ** Quran Text (Arabic)**  
+    **Quran Text (Arabic)**  
     Digital Khatt Script - [Tarteel Resources](https://qul.tarteel.ai/resources/quran-script/56)
     
-    ** English Translation**  
+    **English Translation**  
     Saheeh International Translation - [Tarteel](https://qul.tarteel.ai/resources/translation/193) | [Wikipedia](https://en.wikipedia.org/wiki/Sahih_International)
     
-    ** Arabic Tafseer (Commentary)**  
+    **Arabic Tafseer (Commentary)**  
     Scholarly Commentary - [Tarteel Resources](https://qul.tarteel.ai/resources/tafsir/23)
     
     All content is provided for educational and spiritual enrichment purposes.
