@@ -297,6 +297,16 @@ def main():
         font-size: 16px !important;
     }
     
+    /* Hide the "Press Enter to apply" message */
+    .stTextInput > div > div > div > div {
+        display: none !important;
+    }
+    
+    /* Alternative selector for the helper text */
+    [data-testid="InputInstructions"] {
+        display: none !important;
+    }
+    
     /* Mobile-first responsive design */
     @media (max-width: 768px) {
         .main .block-container {
@@ -407,7 +417,8 @@ def main():
             placeholder="Ask about Quranic themes or concepts...",
             help="Search the Quran's tafsir (commentary) using natural language. Find explanations, themes, and insights from the Quran.",
             label_visibility="collapsed",
-            max_chars=200
+            max_chars=200,
+            key="search_input"
         )
     
     with search_col2:
