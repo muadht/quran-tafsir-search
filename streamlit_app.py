@@ -230,6 +230,9 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
     
     # Create result container with custom styling
     with st.container():
+        # Add subtle result card styling
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        
         # Header with surah name, verse number, and similarity score
         verse_url = f"https://quran.com/{surah_num}:{verse_num}"
         header_col1, header_col2 = st.columns([3, 1])
@@ -249,9 +252,15 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
         # Arabic text (RTL)
         st.markdown(f'<div class="arabic-text">{arabic_text}</div>', unsafe_allow_html=True)
         
+        # Small padding before audio
+        st.markdown("<div style='margin: 10px 0;'></div>", unsafe_allow_html=True)
+        
         # Audio player
         if audio_url:
             st.audio(audio_url, format="audio/mp3")
+        
+        # Small padding before tafsir
+        st.markdown("<div style='margin: 15px 0;'></div>", unsafe_allow_html=True)
         
         # Tafsir text
         st.markdown(f'<div class="tafsir-text">{result_doc}</div>', unsafe_allow_html=True)
@@ -260,7 +269,9 @@ def display_search_result(result_doc, result_meta, result_distance, idx):
         with st.expander("Qurtubi Tafsir", expanded=False):
             qurtubi_tafsir = fetch_qurtubi_tafsir(ayah_key)
             st.markdown(f"<div class='qurtubi-tafsir-text'>{qurtubi_tafsir}</div>", unsafe_allow_html=True)
-        st.divider()
+        
+        st.markdown('</div>', unsafe_allow_html=True)  # Close result-card
+        st.markdown("<div style='margin: 25px 0;'></div>", unsafe_allow_html=True)  # Space between results
 
 
 def main():
@@ -364,13 +375,23 @@ def main():
         padding: 10px 0 0 0;
         text-align: center;
     }
+    
     .result-card {
-        background-color: #1e1e1e;
+        background: rgba(240, 242, 246, 0.3);
         padding: 20px;
-        border-radius: 10px;
-        margin: 20px 0;
-        border-left: 4px solid #0A84FF;
+        border-radius: 8px;
+        margin: 10px 0;
+        border: 1px solid rgba(0, 0, 0, 0.1);
     }
+    
+    /* Dark theme result cards */
+    @media (prefers-color-scheme: dark) {
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    }
+    
     </style>
     """, unsafe_allow_html=True)
     
